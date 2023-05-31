@@ -15,11 +15,16 @@ WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 # Initialize Board
 board = pygame.sprite.Group()
 
+# Some variables we will use to loop through the initialization of the board
 cur_tile = WOOD_TILE_1
 x, y, = 150, 50
 step = 75
+
+# A two-dimensional list to use as a convenient reference to all the board sprites later
+board_reference = []
 for i in range(0, 8):
-    for j in range (0, 8):  
+    row = []
+    for j in range (0, 8):
         if j % 2 == 0 and i % 2 == 0 or j % 2 != 0 and i % 2 != 0:
             cur_tile = WOOD_TILE_1
         else:
@@ -27,9 +32,11 @@ for i in range(0, 8):
 
         tile = CheckerSquare(x, y, cur_tile)
         board.add(tile)
+        row.append(tile)
         x += step
     y += step
     x = 150
+    board_reference.append(row)
 
 # Initialize Pieces
 red_pawn = RedPawn(50, 50)

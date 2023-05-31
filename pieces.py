@@ -25,6 +25,9 @@ class CheckerSquare(pygame.sprite.Sprite):
         self.image = tile
         self.rect = self.image.get_rect()
         self.rect.topleft = [x_pos, y_pos]
+    
+    def __str__(self):
+        return f"Checker Square a position ({self.x_pos}, {self.y_pos})"
 
 
 class RedPawn(pygame.sprite.Sprite):

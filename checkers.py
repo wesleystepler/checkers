@@ -1,17 +1,37 @@
 import pygame
 import os
-from pieces import BlackKing, BlackPawn, RedKing, RedPawn
+from pieces import BlackKing, BlackPawn, CheckerSquare, RedKing, RedPawn, WOOD_TILE_1, WOOD_TILE_2
 
 
 # Set up the Display
 pygame.init()
 pygame.display.set_caption("Checkers")
 
-WIDTH = 700
+WIDTH = 900
 HEIGHT = 700
 FPS = 60
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
 
+# Initialize Board
+board = pygame.sprite.Group()
+
+cur_tile = WOOD_TILE_1
+x, y, = 150, 50
+step = 75
+for i in range(0, 8):
+    for j in range (0, 8):  
+        if j % 2 == 0 and i % 2 == 0 or j % 2 != 0 and i % 2 != 0:
+            cur_tile = WOOD_TILE_1
+        else:
+            cur_tile = WOOD_TILE_2
+
+        tile = CheckerSquare(x, y, cur_tile)
+        board.add(tile)
+        x += step
+    y += step
+    x = 150
+
+# Initialize Pieces
 red_pawn = RedPawn(50, 50)
 red_king = RedKing(300, 50)
 black_pawn = BlackPawn(50, 650)
@@ -27,10 +47,10 @@ black_pieces.add(black_king)
 
 # Method for drawing the screen
 def draw_window():
-  board = pygame.image.load("images/board.jpg").convert()
-  WIN.blit(board, (0, 0))
-  red_pieces.draw(WIN)
-  black_pieces.draw(WIN)
+  WIN.fill((1,50,32))
+  board.draw(WIN)
+  #red_pieces.draw(WIN)
+  #black_pieces.draw(WIN)
   pygame.display.flip()
   
 

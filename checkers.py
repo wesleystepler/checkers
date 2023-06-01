@@ -21,9 +21,11 @@ cursor = CURSOR.get_rect()
 # Load and scale images for the Board
 WOOD_TILE_IMAGE_1 = pygame.image.load(os.path.join('images', 'wood-tile-1.jpg'))
 WOOD_TILE_IMAGE_2 = pygame.image.load(os.path.join('images', 'wood-tile-2.jpg'))
+POSSIBLE_MOVE_IMAGE = pygame.image.load(os.path.join('images', 'can-move.png'))
 
 WOOD_TILE_1 = pygame.transform.scale(WOOD_TILE_IMAGE_1, (75, 75))
 WOOD_TILE_2 = pygame.transform.scale(WOOD_TILE_IMAGE_2, (75, 75))
+POSSIBLE_MOVE = pygame.transform.scale(POSSIBLE_MOVE_IMAGE, (75, 75))
 
 
 # Some variables we will use to loop through the initialization of the board
@@ -107,12 +109,61 @@ def draw_window():
   black_pieces.draw(WIN)
   pygame.draw.rect(WIN, (0,0,0), cursor)
   pygame.display.flip()
+
+def get_possible_moves(piece, board_reference):
+    possible_moves = []
+    for i in range(0, len(board_reference)):
+        for j in range(0, len(board_reference[i])):
+            if board_reference[i][j].rect.colliderect(piece):
+
+                if piece.color == 'red':
+                    if (j+1) < len(board_reference[i]):
+                        possible_moves.append(board_reference[i+1][j+1])
+                        board_reference[i+1][j+1].image = POSSIBLE_MOVE
+                    if (j-1) >= 0:
+                        possible_moves.append(board_reference[i+1][j-1])
+                        board_reference[i+1][j-1].image = POSSIBLE_MOVE
+
+                if piece.color == 'black':
+                    if (j+1) < len(board_reference[i]):
+                        possible_moves.append(board_reference[i+1][j+1])
+                        board_reference[i-1][j+1].image = POSSIBLE_MOVE
+                    if (j-1) >= 0:
+                        possible_moves.append(board_reference[i-1][j-1])
+                        board_reference[i-1][j-1].image = POSSIBLE_MOVE
+
+    return possible_moves
+
+def move(piece, options):
+    for i in range(0, len(options)):
+        if options[i].rect.colliderect(cursor):
+            piece.rect.center = options[i].rect.center
+ 
+
+def deselect(board_reference):
+    # This is not very efficient and should be optimized
+    for i in range(0, len(board_reference)):
+        for j in range(0, len(board_reference[i])):
+            if board_reference[i][j].image == POSSIBLE_MOVE:
+                if i % 2 == 0:
+                    if j % 2 == 0:
+                        board_reference[i][j].image == WOOD_TILE_1
+                    else:
+                        board_reference[i][j].image == WOOD_TILE_2
+                elif i % 2 != 0:
+                    if j % 2 != 0:
+                        board_reference[i][j].image == WOOD_TILE_1
+                    else:
+                        board_reference[i][j].image == WOOD_TILE_2
+                
+
   
 
 def main():
   clock = pygame.time.Clock()
 
   running = True
+  piece_selected = False
   while running:
     pos = pygame.mouse.get_pos()
     cursor.center = pos
@@ -120,14 +171,26 @@ def main():
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and not piece_selected:
+            print('test2')
+            piece_selected = True
             for piece in pieces:
                 if piece.rect.colliderect(cursor):
-                    piece.move()
+                    options = get_possible_moves(piece, board_reference)
+                    move(piece, options)
+
+        elif event.type == pygame.MOUSEBUTTONDOWN and piece_selected:
+            print('test1')
+            deselect(board_reference)
+            for piece in pieces:
+                if piece.rect.colliderect(cursor):
+                    options = get_possible_moves(piece, board_reference)
+                    move(piece, options)
+
                 
     # We will be using this later when we implement moving pieces   
     keys_pressed = pygame.key.get_pressed()
     draw_window()
 
 if __name__ == "__main__":
-  main()
+    main()

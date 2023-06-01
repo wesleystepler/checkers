@@ -35,14 +35,6 @@ class Pawn(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = [x_pos, y_pos]
 
-    def move(self, board_reference):
-        pass
-        """cur_square = {}
-        for i in range(0, len(board_reference)):
-            for s in range(0, len(i)):
-                if board_reference[i][j].colliderect(self):
-                    cur_square["i"] = """
-
 
 class King(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, color) -> None:

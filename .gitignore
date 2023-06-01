@@ -1,3 +1,4 @@
 env
 tutorial
 .vscode
+__pycache__

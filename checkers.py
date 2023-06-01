@@ -118,19 +118,26 @@ def get_possible_moves(piece, board_reference):
 
                 if piece.color == 'red':
                     if (j+1) < len(board_reference[i]):
-                        possible_moves.append(board_reference[i+1][j+1])
-                        board_reference[i+1][j+1].image = POSSIBLE_MOVE
+                        if not board_reference[i+1][j+1].occupied(pieces):
+                            possible_moves.append(board_reference[i+1][j+1])
+                            board_reference[i+1][j+1].image = POSSIBLE_MOVE
+
                     if (j-1) >= 0:
-                        possible_moves.append(board_reference[i+1][j-1])
-                        board_reference[i+1][j-1].image = POSSIBLE_MOVE
+                        if not board_reference[i+1][j-1].occupied(pieces):
+                            possible_moves.append(board_reference[i+1][j-1])
+                            board_reference[i+1][j-1].image = POSSIBLE_MOVE
 
                 if piece.color == 'black':
                     if (j+1) < len(board_reference[i]):
-                        possible_moves.append(board_reference[i-1][j+1])
-                        board_reference[i-1][j+1].image = POSSIBLE_MOVE
+                        if not board_reference[i-1][j+1].occupied(pieces):
+                            possible_moves.append(board_reference[i-1][j+1])
+                            board_reference[i-1][j+1].image = POSSIBLE_MOVE
                     if (j-1) >= 0:
-                        possible_moves.append(board_reference[i-1][j-1])
-                        board_reference[i-1][j-1].image = POSSIBLE_MOVE
+                        if not board_reference[i-1][j-1].occupied(pieces):
+                            possible_moves.append(board_reference[i-1][j-1])
+                            board_reference[i-1][j-1].image = POSSIBLE_MOVE
+
+
 
     return possible_moves
 
@@ -173,18 +180,19 @@ def main():
         if event.type == pygame.QUIT:
             running = False 
 
-    
-    for piece in pieces:
-        if piece.rect.colliderect(cursor) and not piece_selected:
-            options = get_possible_moves(piece, board_reference)
-            move(piece, options)
-            deselect(board_reference)
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            for piece in pieces:
+                if piece.rect.colliderect(cursor) and not piece_selected:
+                    piece_selected = True
+                    options = get_possible_moves(piece, board_reference)
+                    move(piece, options)
+                    deselect(board_reference)
 
-    
-        elif piece.rect.colliderect(cursor) and piece_selected:
-            deselect(board_reference)
-            options = get_possible_moves(piece, board_reference)
-            move(piece, options)
+            
+                #elif piece.rect.colliderect(cursor) and piece_selected:
+                #    deselect(board_reference)
+                #    options = get_possible_moves(piece, board_reference)
+                #    move(piece, options)
 
 if __name__ == "__main__":
     main()

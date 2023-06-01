@@ -120,57 +120,65 @@ def get_possible_moves(piece, board_reference):
                     if (j+1) < len(board_reference[i]):
                         if not board_reference[i+1][j+1].occupied(pieces):
                             possible_moves.append(board_reference[i+1][j+1])
-                            board_reference[i+1][j+1].image = POSSIBLE_MOVE
+                            #board_reference[i+1][j+1].image = POSSIBLE_MOVE
 
                     if (j-1) >= 0:
                         if not board_reference[i+1][j-1].occupied(pieces):
                             possible_moves.append(board_reference[i+1][j-1])
-                            board_reference[i+1][j-1].image = POSSIBLE_MOVE
+                            #board_reference[i+1][j-1].image = POSSIBLE_MOVE
 
                 if piece.color == 'black':
                     if (j+1) < len(board_reference[i]):
                         if not board_reference[i-1][j+1].occupied(pieces):
                             possible_moves.append(board_reference[i-1][j+1])
-                            board_reference[i-1][j+1].image = POSSIBLE_MOVE
+                            #board_reference[i-1][j+1].image = POSSIBLE_MOVE
                     if (j-1) >= 0:
                         if not board_reference[i-1][j-1].occupied(pieces):
                             possible_moves.append(board_reference[i-1][j-1])
-                            board_reference[i-1][j-1].image = POSSIBLE_MOVE
-
-
-
+                            #board_reference[i-1][j-1].image = POSSIBLE_MOVE
     return possible_moves
+
 
 def move(piece, options):
     for i in range(0, len(options)):
         if options[i].rect.colliderect(cursor):
             piece.rect.center = options[i].rect.center
+        
  
 
-def deselect(board_reference):
-    # This is not very efficient and should be optimized
-    for i in range(0, len(board_reference)):
-        for j in range(0, len(board_reference[i])):
-            if board_reference[i][j].image == POSSIBLE_MOVE:
-                if i % 2 == 0:
-                    if j % 2 == 0:
-                        board_reference[i][j].image == WOOD_TILE_1
+def deselect(board_reference, options, selected):
+    # The highlighted spaces are proving to be too much trouble right now, so I'll come back to them
+    """for op in range(0, len(options)):
+        for i in range(0, len(board_reference)):
+            for j in range(0, len(board_reference[i])):
+                if board_reference[i][j].image == options[op]:
+                    if j < 7:
+                        if board_reference[i][j+1] == WOOD_TILE_1:
+                            board_reference[i][j].image = WOOD_TILE_2
+                        else:
+                            board_reference = WOOD_TILE_1
                     else:
-                        board_reference[i][j].image == WOOD_TILE_2
-                elif i % 2 != 0:
-                    if j % 2 != 0:
-                        board_reference[i][j].image == WOOD_TILE_1
-                    else:
-                        board_reference[i][j].image == WOOD_TILE_2
-                
+                        if board_reference[i][j-1] == WOOD_TILE_1:
+                            board_reference[i][j].image = WOOD_TILE_2
+                        else:
+                            board_reference = WOOD_TILE_1"""
 
-  
+    options.clear()
+    return options
+
+                
 
 def main():
   clock = pygame.time.Clock()
 
   running = True
+
   piece_selected = False
+  options = []
+  moved = False
+  cur_piece = None
+  selected = None
+
   while running:
     draw_window()
     pos = pygame.mouse.get_pos()
@@ -180,19 +188,21 @@ def main():
         if event.type == pygame.QUIT:
             running = False 
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN and not moved:
             for piece in pieces:
-                if piece.rect.colliderect(cursor) and not piece_selected:
+                if piece.rect.colliderect(cursor):
                     piece_selected = True
+                    cur_piece = piece
+                    if len(options) != 0:
+                        options = deselect(board_reference, options, selected)
                     options = get_possible_moves(piece, board_reference)
-                    move(piece, options)
-                    deselect(board_reference)
+                    if len(options) != 0:
+                        selected = options[0]
 
-            
-                #elif piece.rect.colliderect(cursor) and piece_selected:
-                #    deselect(board_reference)
-                #    options = get_possible_moves(piece, board_reference)
-                #    move(piece, options)
+        
+        if event.type == pygame.MOUSEBUTTONDOWN and piece_selected:
+            move(cur_piece, options) 
+            #deselect(board_reference, options, selected)         
 
 if __name__ == "__main__":
     main()

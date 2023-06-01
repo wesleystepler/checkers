@@ -126,7 +126,7 @@ def get_possible_moves(piece, board_reference):
 
                 if piece.color == 'black':
                     if (j+1) < len(board_reference[i]):
-                        possible_moves.append(board_reference[i+1][j+1])
+                        possible_moves.append(board_reference[i-1][j+1])
                         board_reference[i-1][j+1].image = POSSIBLE_MOVE
                     if (j-1) >= 0:
                         possible_moves.append(board_reference[i-1][j-1])
@@ -165,32 +165,26 @@ def main():
   running = True
   piece_selected = False
   while running:
+    draw_window()
     pos = pygame.mouse.get_pos()
     cursor.center = pos
     clock.tick(FPS)
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False 
-        if event.type == pygame.MOUSEBUTTONDOWN and not piece_selected:
-            print('test2')
-            piece_selected = True
-            for piece in pieces:
-                if piece.rect.colliderect(cursor):
-                    options = get_possible_moves(piece, board_reference)
-                    move(piece, options)
 
-        elif event.type == pygame.MOUSEBUTTONDOWN and piece_selected:
-            print('test1')
+    
+    for piece in pieces:
+        if piece.rect.colliderect(cursor) and not piece_selected:
+            options = get_possible_moves(piece, board_reference)
+            move(piece, options)
             deselect(board_reference)
-            for piece in pieces:
-                if piece.rect.colliderect(cursor):
-                    options = get_possible_moves(piece, board_reference)
-                    move(piece, options)
 
-                
-    # We will be using this later when we implement moving pieces   
-    keys_pressed = pygame.key.get_pressed()
-    draw_window()
+    
+        elif piece.rect.colliderect(cursor) and piece_selected:
+            deselect(board_reference)
+            options = get_possible_moves(piece, board_reference)
+            move(piece, options)
 
 if __name__ == "__main__":
     main()

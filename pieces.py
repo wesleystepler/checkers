@@ -23,6 +23,7 @@ class CheckerSquare(pygame.sprite.Sprite):
         for piece in pieces:
             if self.rect.colliderect(piece):
                 result = True
+                break
         return result
 
 

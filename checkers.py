@@ -136,6 +136,7 @@ def get_possible_moves(piece, board_reference):
                         if not board_reference[i-1][j-1].occupied(pieces):
                             possible_moves.append(board_reference[i-1][j-1])
                             #board_reference[i-1][j-1].image = POSSIBLE_MOVE
+                break
     return possible_moves
 
 
@@ -143,9 +144,9 @@ def move(piece, options):
     for i in range(0, len(options)):
         if options[i].rect.colliderect(cursor):
             piece.rect.center = options[i].rect.center
+            break
         
  
-
 def deselect(board_reference, options, selected):
     # The highlighted spaces are proving to be too much trouble right now, so I'll come back to them
     """for op in range(0, len(options)):
@@ -177,7 +178,11 @@ def main():
   options = []
   moved = False
   cur_piece = None
-  selected = None
+  last_click = (0, 0)
+  mid_click = False
+  
+  #Keep track of whose turn it is
+  P1TURN = True
 
   while running:
     draw_window()
@@ -189,6 +194,8 @@ def main():
             running = False 
 
         if event.type == pygame.MOUSEBUTTONDOWN and not moved:
+            mid_click = not mid_click
+            last_click = pygame.mouse.get_pos()
             for piece in pieces:
                 if piece.rect.colliderect(cursor):
                     piece_selected = True
@@ -198,11 +205,19 @@ def main():
                     options = get_possible_moves(piece, board_reference)
                     if len(options) != 0:
                         selected = options[0]
+                    break
+            break
 
         
-        if event.type == pygame.MOUSEBUTTONDOWN and piece_selected:
+        elif piece_selected and pygame.MOUSEBUTTONDOWN and not mid_click:
+            mid_click = not mid_click
             move(cur_piece, options) 
-            #deselect(board_reference, options, selected)         
+            options = deselect(board_reference, options, selected) 
+            moved = True
+
+        elif moved:
+            P1TURN = not P1TURN 
+            moved = False       
 
 if __name__ == "__main__":
     main()

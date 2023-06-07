@@ -155,8 +155,9 @@ def get_possible_moves(piece, board_reference):
                 break
     return possible_moves
 
-
 def cursor_on_piece(cursor, black_pieces, red_pieces, turn):
+    """ Checks if the cursor is over a piece on the board. Will
+        only return True if it's a piece that belongs to the correct player."""
     if turn:
         for piece in black_pieces:
             if piece.rect.colliderect(cursor):
@@ -168,10 +169,11 @@ def cursor_on_piece(cursor, black_pieces, red_pieces, turn):
                 return True
         return False
 
-def cursor_on_square(cursor, board_reference, pieces):
+def cursor_on_square(cursor, board_reference, pieces, options):
+    """ Checks if the cursor is over an open square on the board"""
     for i in range(0, len(board_reference)):
         for j in range(0, len(board_reference[i])):
-            if board_reference[i][j].rect.colliderect(cursor) and not board_reference[i][j].occupied(pieces):
+            if board_reference[i][j].rect.colliderect(cursor) and not board_reference[i][j].occupied(pieces) and board_reference[i][j] in options:
                 return True
     return False
 
@@ -225,7 +227,7 @@ def main():
             running = False 
 
         # Check if the player has clicked on a valid piece or clicked on an unoccupied square to move to
-        if event.type == pygame.MOUSEBUTTONDOWN and cursor_on_piece(cursor, red_pieces, black_pieces, P1TURN):
+        if event.type == pygame.MOUSEBUTTONDOWN and cursor_on_piece(cursor, black_pieces, red_pieces, P1TURN):
             for piece in pieces:
                 if piece.rect.colliderect(cursor):
                     cur_piece = piece
@@ -236,8 +238,9 @@ def main():
                     #if len(options) != 0:
                     #    selected = options[0]
                     break
-
-        elif piece_selected and event.type == pygame.MOUSEBUTTONDOWN and cursor_on_square(cursor, board_reference, pieces):
+        # Only allow this to execute if a piece has been selected to prevent any click on a square
+        # resulting in a turn ending
+        elif piece_selected and event.type == pygame.MOUSEBUTTONDOWN and cursor_on_square(cursor, board_reference, pieces, options):
             move(cur_piece, options) 
             options = deselect(options) 
             P1TURN = not P1TURN  

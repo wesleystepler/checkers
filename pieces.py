@@ -33,6 +33,7 @@ class Pawn(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, color) -> None:
         super().__init__()
         self.color = color
+        self.type = "Pawn"
         if color == "red":
             self.image = RED_PAWN
         elif color == "black":
@@ -48,6 +49,7 @@ class King(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, color) -> None:
         super().__init__()
         self.color = color
+        self.type = "King"
         if color == "red":
             self.image = RED_KING
         elif color == "black": 
@@ -56,6 +58,4 @@ class King(pygame.sprite.Sprite):
             Exception("Invalid Input: Please enter 'red' or 'black' for King color attribute")
         self.rect = self.image.get_rect()
         self.rect.center = [x_pos, y_pos]
-    
-    def move(self, board_reference):
-        pass
+

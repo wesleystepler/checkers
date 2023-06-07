@@ -1,6 +1,6 @@
 import pygame
 import os
-from pieces import King, Pawn, CheckerSquare
+from pieces import King, Pawn, CheckerSquare, BLACK_KING, RED_KING
 
 # Set up the Display
 pygame.init()
@@ -132,23 +132,24 @@ def get_possible_moves(piece, board_reference):
         for j in range(0, len(board_reference[i])):
             if board_reference[i][j].rect.colliderect(piece):
 
-                if piece.color == 'red':
-                    if (j+1) < len(board_reference[i]):
+                if piece.color == 'red' or piece.type == "King":
+                    # Fix this to account for i and not just j
+                    if (j+1) < len(board_reference[i]) and (i + 1) < len(board_reference):
                         if not board_reference[i+1][j+1].occupied(pieces):
                             possible_moves.append(board_reference[i+1][j+1])
                             #board_reference[i+1][j+1].image = POSSIBLE_MOVE
 
-                    if (j-1) >= 0:
+                    if (j-1) >= 0 and (i + 1) < len(board_reference):
                         if not board_reference[i+1][j-1].occupied(pieces):
                             possible_moves.append(board_reference[i+1][j-1])
                             #board_reference[i+1][j-1].image = POSSIBLE_MOVE
 
-                if piece.color == 'black':
-                    if (j+1) < len(board_reference[i]):
+                if piece.color == 'black' or piece.type == "King":
+                    if (j+1) < len(board_reference[i]) and (i - 1) >= 0:
                         if not board_reference[i-1][j+1].occupied(pieces):
                             possible_moves.append(board_reference[i-1][j+1])
                             #board_reference[i-1][j+1].image = POSSIBLE_MOVE
-                    if (j-1) >= 0:
+                    if (j-1) >= 0 and (i - 1) >= 0:
                         if not board_reference[i-1][j-1].occupied(pieces):
                             possible_moves.append(board_reference[i-1][j-1])
                             #board_reference[i-1][j-1].image = POSSIBLE_MOVE
@@ -183,8 +184,14 @@ def move(piece, options):
         if options[i].rect.colliderect(cursor):
             piece.rect.center = options[i].rect.center
             break
-        
- 
+
+
+def king_me(piece, pieces):
+    king = King(piece.rect.center[0], piece.rect.center[1], piece.color)
+    piece.kill()
+    pieces.add(king)
+
+
 def deselect(options): # Deleted parameters: board_reference, selected
     # The highlighted spaces are proving to be too much trouble right now, so I'll come back to them
     """for op in range(0, len(options)):
@@ -206,7 +213,6 @@ def deselect(options): # Deleted parameters: board_reference, selected
     return options
 
                 
-
 def main():
   global P1TURN
   clock = pygame.time.Clock()
@@ -242,6 +248,27 @@ def main():
         # resulting in a turn ending
         elif piece_selected and event.type == pygame.MOUSEBUTTONDOWN and cursor_on_square(cursor, board_reference, pieces, options):
             move(cur_piece, options) 
+            if P1TURN:
+                for square in board_reference[0]:
+                    if cur_piece.rect.colliderect(square):
+                        king = King(piece.rect.center[0], piece.rect.center[1], piece.color)
+                        cur_piece.kill()
+                        pieces.remove(cur_piece)
+                        black_pieces.add(king)
+                        cur_piece = king
+                        pieces.append(cur_piece)
+                        break
+            else:
+                for square in board_reference[7]:
+                    if cur_piece.rect.colliderect(square):
+                        king = King(piece.rect.center[0], piece.rect.center[1], piece.color)
+                        cur_piece.kill()
+                        pieces.remove(cur_piece)
+                        red_pieces.add(king)
+                        cur_piece = king
+                        pieces.append(cur_piece)
+                        break
+
             options = deselect(options) 
             P1TURN = not P1TURN  
             piece_selected = False 

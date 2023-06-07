@@ -6,10 +6,14 @@ from pieces import King, Pawn, CheckerSquare
 pygame.init()
 pygame.display.set_caption("Checkers")
 
+# Some global variables that will be helpful to us
 WIDTH = 900
 HEIGHT = 700
 FPS = 60
+FONT = pygame.font.SysFont("Times New Roman", 30)
 WIN = pygame.display.set_mode((WIDTH, HEIGHT))
+#Keep track of whose turn it is
+P1TURN = True
 
 #Create Rect object in place of normal mouse cursor
 pygame.mouse.set_visible(False)
@@ -68,6 +72,8 @@ for i in range(0, 8):
 # Initialize Pieces
 # A generic list of all the pieces we will reference later
 pieces = []
+
+# Two lists of each set of pieces
 red_pieces = pygame.sprite.Group()
 black_pieces = pygame.sprite.Group()
 
@@ -101,14 +107,24 @@ for a in range(0, 2):
         pieces.append(piece)
         j += 2
 
+# Method to display on the screen whose turn it is
+def whose_turn(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    WIN.blit(img, (x,y))
+
 # Method for drawing the screen
 def draw_window():
   WIN.fill((1,50,32))
+  if P1TURN:
+      whose_turn("Player 1, it's your turn!", FONT, (255, 255, 255), 150, 0)
+  if not P1TURN:
+      whose_turn("Player 2, it's your turn!", FONT, (255, 255, 255), 150, 0)
   board.draw(WIN)
   red_pieces.draw(WIN)
   black_pieces.draw(WIN)
   pygame.draw.rect(WIN, (0,0,0), cursor)
   pygame.display.flip()
+
 
 def get_possible_moves(piece, board_reference):
     possible_moves = []
@@ -140,11 +156,17 @@ def get_possible_moves(piece, board_reference):
     return possible_moves
 
 
-def cursor_on_piece(cursor, pieces):
-    for piece in pieces:
-        if piece.rect.colliderect(cursor):
-            return True
-    return False
+def cursor_on_piece(cursor, black_pieces, red_pieces, turn):
+    if turn:
+        for piece in black_pieces:
+            if piece.rect.colliderect(cursor):
+                return True
+        return False
+    else:
+        for piece in red_pieces:
+            if piece.rect.colliderect(cursor):
+                return True
+        return False
 
 def cursor_on_square(cursor, board_reference, pieces):
     for i in range(0, len(board_reference)):
@@ -184,16 +206,14 @@ def deselect(options): # Deleted parameters: board_reference, selected
                 
 
 def main():
+  global P1TURN
   clock = pygame.time.Clock()
 
   running = True
 
   options = []
-  moved = False
+  piece_selected = False
   cur_piece = None
-  
-  #Keep track of whose turn it is
-  P1TURN = True
 
   while running:
     draw_window()
@@ -204,25 +224,24 @@ def main():
         if event.type == pygame.QUIT:
             running = False 
 
-        # Check if the player has clicked on a piece of clicked on an unoccupied square to move to
-        if event.type == pygame.MOUSEBUTTONDOWN and cursor_on_piece(cursor, pieces):
+        # Check if the player has clicked on a valid piece or clicked on an unoccupied square to move to
+        if event.type == pygame.MOUSEBUTTONDOWN and cursor_on_piece(cursor, red_pieces, black_pieces, P1TURN):
             for piece in pieces:
                 if piece.rect.colliderect(cursor):
                     cur_piece = piece
+                    piece_selected = True
                     options = get_possible_moves(piece, board_reference)
+
                     # This may be helpful if I try to highlight pieces again, so keeping it for now
                     #if len(options) != 0:
                     #    selected = options[0]
                     break
 
-        elif event.type == pygame.MOUSEBUTTONDOWN and cursor_on_square(cursor, board_reference, pieces):
+        elif piece_selected and event.type == pygame.MOUSEBUTTONDOWN and cursor_on_square(cursor, board_reference, pieces):
             move(cur_piece, options) 
             options = deselect(options) 
-            moved = True
-
-        elif moved:
-            P1TURN = not P1TURN 
-            moved = False       
+            P1TURN = not P1TURN  
+            piece_selected = False 
 
 if __name__ == "__main__":
     main()

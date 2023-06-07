@@ -194,7 +194,7 @@ def king_me(piece, pieces):
     pieces.add(king)
 
 
-def deselect(options, board_reference): # Deleted parameters: board_reference, selected
+def deselect(options):
     # The highlighted spaces are proving to be too much trouble right now, so I'll come back to them
     for squares in options:
         squares.image = WOOD_TILE_2
@@ -242,6 +242,8 @@ def main():
                 if piece.rect.colliderect(cursor):
                     cur_piece = piece
                     piece_selected = True
+                    if len(options) != 0:
+                        deselect(options)
                     options = get_possible_moves(piece, board_reference)
 
                     # This may be helpful if I try to highlight pieces again, so keeping it for now
@@ -273,7 +275,7 @@ def main():
                         pieces.append(cur_piece)
                         break
 
-            options = deselect(options, board_reference) 
+            options = deselect(options) 
             P1TURN = not P1TURN  
             piece_selected = False 
 

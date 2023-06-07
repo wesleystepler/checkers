@@ -154,6 +154,8 @@ def get_possible_moves(piece, board_reference):
                             possible_moves.append(board_reference[i-1][j-1])
                             #board_reference[i-1][j-1].image = POSSIBLE_MOVE
                 break
+    for move in possible_moves:
+        move.image = POSSIBLE_MOVE
     return possible_moves
 
 def cursor_on_piece(cursor, black_pieces, red_pieces, turn):
@@ -192,8 +194,10 @@ def king_me(piece, pieces):
     pieces.add(king)
 
 
-def deselect(options): # Deleted parameters: board_reference, selected
+def deselect(options, board_reference): # Deleted parameters: board_reference, selected
     # The highlighted spaces are proving to be too much trouble right now, so I'll come back to them
+    for squares in options:
+        squares.image = WOOD_TILE_2
     """for op in range(0, len(options)):
         for i in range(0, len(board_reference)):
             for j in range(0, len(board_reference[i])):
@@ -269,7 +273,7 @@ def main():
                         pieces.append(cur_piece)
                         break
 
-            options = deselect(options) 
+            options = deselect(options, board_reference) 
             P1TURN = not P1TURN  
             piece_selected = False 
 

@@ -19,12 +19,10 @@ class CheckerSquare(pygame.sprite.Sprite):
         self.rect.topleft = [x_pos, y_pos]
 
     def occupied(self, pieces):
-        result = False
         for piece in pieces:
             if self.rect.colliderect(piece):
-                result = True
-                break
-        return result
+                return True
+        return False
 
 
     

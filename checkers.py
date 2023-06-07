@@ -140,6 +140,20 @@ def get_possible_moves(piece, board_reference):
     return possible_moves
 
 
+def cursor_on_piece(cursor, pieces):
+    for piece in pieces:
+        if piece.rect.colliderect(cursor):
+            return True
+    return False
+
+def cursor_on_square(cursor, board_reference, pieces):
+    for i in range(0, len(board_reference)):
+        for j in range(0, len(board_reference[i])):
+            if board_reference[i][j].rect.colliderect(cursor) and not board_reference[i][j].occupied(pieces):
+                return True
+    return False
+
+
 def move(piece, options):
     for i in range(0, len(options)):
         if options[i].rect.colliderect(cursor):
@@ -193,12 +207,11 @@ def main():
         if event.type == pygame.QUIT:
             running = False 
 
-        if event.type == pygame.MOUSEBUTTONDOWN and not moved:
-            mid_click = not mid_click
+        if event.type == pygame.MOUSEBUTTONDOWN and cursor_on_piece(cursor, pieces):
             last_click = pygame.mouse.get_pos()
             for piece in pieces:
                 if piece.rect.colliderect(cursor):
-                    piece_selected = True
+                    #piece_selected = True
                     cur_piece = piece
                     if len(options) != 0:
                         options = deselect(board_reference, options, selected)
@@ -206,11 +219,8 @@ def main():
                     if len(options) != 0:
                         selected = options[0]
                     break
-            break
 
-        
-        elif piece_selected and pygame.MOUSEBUTTONDOWN and not mid_click:
-            mid_click = not mid_click
+        if event.type == pygame.MOUSEBUTTONDOWN and cursor_on_square(cursor, board_reference, pieces):
             move(cur_piece, options) 
             options = deselect(board_reference, options, selected) 
             moved = True

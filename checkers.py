@@ -161,7 +161,7 @@ def move(piece, options):
             break
         
  
-def deselect(board_reference, options, selected):
+def deselect(options): # Deleted parameters: board_reference, selected
     # The highlighted spaces are proving to be too much trouble right now, so I'll come back to them
     """for op in range(0, len(options)):
         for i in range(0, len(board_reference)):
@@ -188,12 +188,9 @@ def main():
 
   running = True
 
-  piece_selected = False
   options = []
   moved = False
   cur_piece = None
-  last_click = (0, 0)
-  mid_click = False
   
   #Keep track of whose turn it is
   P1TURN = True
@@ -207,22 +204,20 @@ def main():
         if event.type == pygame.QUIT:
             running = False 
 
+        # Check if the player has clicked on a piece of clicked on an unoccupied square to move to
         if event.type == pygame.MOUSEBUTTONDOWN and cursor_on_piece(cursor, pieces):
-            last_click = pygame.mouse.get_pos()
             for piece in pieces:
                 if piece.rect.colliderect(cursor):
-                    #piece_selected = True
                     cur_piece = piece
-                    if len(options) != 0:
-                        options = deselect(board_reference, options, selected)
                     options = get_possible_moves(piece, board_reference)
-                    if len(options) != 0:
-                        selected = options[0]
+                    # This may be helpful if I try to highlight pieces again, so keeping it for now
+                    #if len(options) != 0:
+                    #    selected = options[0]
                     break
 
-        if event.type == pygame.MOUSEBUTTONDOWN and cursor_on_square(cursor, board_reference, pieces):
+        elif event.type == pygame.MOUSEBUTTONDOWN and cursor_on_square(cursor, board_reference, pieces):
             move(cur_piece, options) 
-            options = deselect(board_reference, options, selected) 
+            options = deselect(options) 
             moved = True
 
         elif moved:

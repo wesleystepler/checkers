@@ -122,10 +122,15 @@ def midpoint(p1, p2):
 def draw_window():
   """Updates the screen"""
   WIN.fill((1,50,32))
-  if P1TURN:
+  if len(red_pieces) == 0:
+      whose_turn("Player 1 Wins!", FONT, (255, 255, 255), 150, 0)
+  elif len(black_pieces) == 0:
+      whose_turn("Player 2 Wins!", FONT, (255, 255, 255), 150, 0)
+  elif P1TURN:
       whose_turn("Player 1, it's your turn!", FONT, (255, 255, 255), 150, 0)
-  if not P1TURN:
+  elif not P1TURN:
       whose_turn("Player 2, it's your turn!", FONT, (255, 255, 255), 150, 0)
+
   board.draw(WIN)
   red_pieces.draw(WIN)
   black_pieces.draw(WIN)
@@ -255,6 +260,12 @@ def deselect(options):
     options.clear()
     return options
 
+def check_for_winner(red_pieces, black_pieces):
+    if len(black_pieces) == 0:
+        return "Player 2 Wins!"
+    else:
+        return "Player 1 Wins!"
+
                 
 def main():
   """Main method that runs the game"""
@@ -316,6 +327,7 @@ def main():
             # It's P1s turn when this is True, and P2s turn when this is False
             P1TURN = not P1TURN  
             piece_selected = False 
+
 
 if __name__ == "__main__":
     main()

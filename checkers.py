@@ -126,12 +126,14 @@ def draw_window():
 
 
 def get_current_square(piece, board_reference):
+    """Returns the i and j indicies of the square the selected piece is currently on"""
     for i in range(0, len(board_reference)):
         for j in range(0, len(board_reference[i])):
             if piece.rect.colliderect(board_reference[i][j]):
                 return (i, j)
+            
 
-def get_possible_moves(piece, board_reference, black_pieces, red_pieces):
+def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces):
     """Returns all possible moves for a given piece and highlights them on the board"""
     possible_moves = []
     for i in range(0, len(board_reference)):
@@ -144,8 +146,8 @@ def get_possible_moves(piece, board_reference, black_pieces, red_pieces):
                             possible_moves.append(board_reference[i+1][j+1])
                         elif (i+2) < len(board_reference) and (j+2) < len(board_reference[i]):
                             if not board_reference[i+2][j+2].occupied(pieces):
-                                for p in black_pieces:
-                                    if p.rect.colliderect(board_reference[i+1][j+1]):
+                                for p in pieces:
+                                    if p.rect.colliderect(board_reference[i+1][j+1]) and p.color != piece.color:
                                         possible_moves.append(board_reference[i+2][j+2])
 
                     if (j-1) >= 0 and (i + 1) < len(board_reference):
@@ -153,8 +155,8 @@ def get_possible_moves(piece, board_reference, black_pieces, red_pieces):
                             possible_moves.append(board_reference[i+1][j-1])
                         elif (i+2) < len(board_reference) and (j-2) >= 0:
                             if not board_reference[i+2][j-2].occupied(pieces):
-                                for p in black_pieces:
-                                    if p.rect.colliderect(board_reference[i+1][j-1]):
+                                for p in pieces:
+                                    if p.rect.colliderect(board_reference[i+1][j-1]) and p.color != piece.color:
                                         possible_moves.append(board_reference[i+2][j-2])
 
                 if piece.color == 'black' or piece.type == "King":
@@ -163,8 +165,8 @@ def get_possible_moves(piece, board_reference, black_pieces, red_pieces):
                             possible_moves.append(board_reference[i-1][j+1])
                         elif (i-2) >= 0 and (j+2) < len(board_reference[i]):
                             if not board_reference[i-2][j+2].occupied(pieces):
-                                for p in red_pieces:
-                                    if p.rect.colliderect(board_reference[i-1][j+1]):
+                                for p in pieces:
+                                    if p.rect.colliderect(board_reference[i-1][j+1]) and p.color != piece.color:
                                         possible_moves.append(board_reference[i-2][j+2])
                         
 
@@ -173,8 +175,8 @@ def get_possible_moves(piece, board_reference, black_pieces, red_pieces):
                             possible_moves.append(board_reference[i-1][j-1])
                         elif (i-2) >= 0 and (j-2) >= 0:
                             if not board_reference[i-2][j-2].occupied(pieces):
-                                for p in red_pieces:
-                                    if p.rect.colliderect(board_reference[i-1][j-1]):
+                                for p in pieces:
+                                    if p.rect.colliderect(board_reference[i-1][j-1]) and p.color != piece.color:
                                         possible_moves.append(board_reference[i-2][j-2])
                 break
     for move in possible_moves:
@@ -188,12 +190,11 @@ def cursor_on_piece(cursor, black_pieces, red_pieces, turn):
         for piece in black_pieces:
             if piece.rect.colliderect(cursor):
                 return True
-        return False
     else:
         for piece in red_pieces:
             if piece.rect.colliderect(cursor):
                 return True
-        return False
+    return False
 
 def cursor_on_square(cursor, board_reference, pieces, options):
     """ Checks if the cursor is over an open square on the board"""
@@ -218,12 +219,12 @@ def jump(prev_square, cur_square, board_reference, pieces, black_pieces, red_pie
                 piece.kill()
                 pieces.remove(piece)
 
-def move(board_reference, pieces, black_pieces, red_pieces, turn, options):
+def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, options):
     """Moves a given piece to the selected available square"""
     #prev_square = get_current_square(piece, board_reference)
     for i in range(0, len(options)):
         if options[i].rect.colliderect(cursor):
-            piece.rect.center = options[i].rect.center
+            cur_piece.rect.center = options[i].rect.center
             break
     #cur_square = get_current_square(piece, board_reference)
     #if abs(cur_square[0] - prev_square[0]) == 2 and abs(prev_square[1] - cur_square[1]) == 0:
@@ -274,13 +275,13 @@ def main():
                     piece_selected = True
                     if len(options) != 0:
                         deselect(options)
-                    options = get_possible_moves(piece, board_reference, black_pieces, red_pieces)
+                    options = get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces)
                     break
 
         # Only allow this to execute if a piece has been selected to prevent any click on a square
         # resulting in a turn ending
         elif piece_selected and event.type == pygame.MOUSEBUTTONDOWN and cursor_on_square(cursor, board_reference, pieces, options):
-            move(board_reference, pieces, black_pieces, red_pieces, P1TURN, options) 
+            move(cur_piece, board_reference, pieces, black_pieces, red_pieces, P1TURN, options) 
             if P1TURN:
                 for square in board_reference[0]:
                     if cur_piece.rect.colliderect(square):

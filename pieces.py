@@ -11,6 +11,7 @@ RED_PAWN = pygame.transform.scale(RED_PAWN_IMAGE, (60, 60))
 RED_KING = pygame.transform.scale(RED_KING_IMAGE, (60, 60))
 BLACK_PAWN = pygame.transform.scale(BLACK_PAWN_IMAGE, (60, 60))
 BLACK_KING = pygame.transform.scale(BLACK_KING_IMAGE, (60, 60))
+
 class CheckerSquare(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, tile):
         super().__init__()
@@ -44,6 +45,13 @@ class Pawn(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = [x_pos, y_pos]
 
+    def fx(self):
+        pygame.mixer.init()
+        pygame.mixer.music.load(os.path.join('sounds', 'move_piece.mp3'))
+        pygame.mixer.music.set_volume(0.75)
+        pygame.mixer.music.play()
+
+
 
 class King(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, color) -> None:
@@ -58,4 +66,10 @@ class King(pygame.sprite.Sprite):
             Exception("Invalid Input: Please enter 'red' or 'black' for King color attribute")
         self.rect = self.image.get_rect()
         self.rect.center = [x_pos, y_pos]
+
+    def fx(self):
+        pygame.mixer.init()
+        pygame.mixer.music.load(os.path.join('sounds', 'move_piece.mp3'))
+        pygame.mixer.music.set_volume(0.75)
+        pygame.mixer.music.play()
 

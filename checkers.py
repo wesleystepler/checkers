@@ -254,6 +254,7 @@ def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, opt
     for i in range(0, len(options)):
         if options[i].rect.colliderect(cursor):
             cur_piece.rect.center = options[i].rect.center
+            cur_piece.fx()
             break
     cur_square = get_current_square(cur_piece, board_reference)
     if abs(cur_square[0] - prev_square[0]) == 2 and abs(prev_square[1] - cur_square[1]) == 2:

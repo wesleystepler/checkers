@@ -111,6 +111,14 @@ def whose_turn(text, font, text_col, x, y):
     img = font.render(text, True, text_col)
     WIN.blit(img, (x,y))
 
+def midpoint(p1, p2):
+    """Helper method that returns the midpoint of a line.
+        Used in this program to help determine the outcome of jumps"""
+    
+    m1 = int((p1[0] + p2[0])/2)
+    m2 = int((p1[1] + p2[1])/2)
+    return (m1, m2)
+
 def draw_window():
   """Updates the screen"""
   WIN.fill((1,50,32))
@@ -204,9 +212,9 @@ def cursor_on_square(cursor, board_reference, pieces, options):
                 return True
     return False
 
-def jump(prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn):
-    i = cur_square[0] - prev_square[0]
-    j = cur_square[1] - prev_square[1]
+def jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn):
+    mid_square = midpoint(cur_square, prev_square)
+    i, j = mid_square[0], mid_square[1]
     taken = board_reference[i][j]
     if turn:
         for piece in red_pieces:
@@ -219,16 +227,17 @@ def jump(prev_square, cur_square, board_reference, pieces, black_pieces, red_pie
                 piece.kill()
                 pieces.remove(piece)
 
+
 def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, options):
     """Moves a given piece to the selected available square"""
-    #prev_square = get_current_square(piece, board_reference)
+    prev_square = get_current_square(cur_piece, board_reference)
     for i in range(0, len(options)):
         if options[i].rect.colliderect(cursor):
             cur_piece.rect.center = options[i].rect.center
             break
-    #cur_square = get_current_square(piece, board_reference)
-    #if abs(cur_square[0] - prev_square[0]) == 2 and abs(prev_square[1] - cur_square[1]) == 0:
-    #    jump(prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn)
+    cur_square = get_current_square(cur_piece, board_reference)
+    if abs(cur_square[0] - prev_square[0]) == 2 and abs(prev_square[1] - cur_square[1]) == 2:
+        jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn)
 
 
 def king_me(piece, pieces):

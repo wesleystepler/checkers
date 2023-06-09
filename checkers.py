@@ -325,7 +325,7 @@ def main():
             # Check if either player has earned a King.
             if P1TURN:
                 for square in board_reference[0]:
-                    if cur_piece.rect.colliderect(square):
+                    if cur_piece.rect.colliderect(square) and cur_piece.type != "King":
                         king = King(piece.rect.center[0], piece.rect.center[1], piece.color)
                         cur_piece.kill()
                         pieces.remove(cur_piece)
@@ -339,7 +339,7 @@ def main():
                 misc_sounds(os.path.join('sounds', 'game-over-fanfare.mp3'))
             else:
                 for square in board_reference[7]:
-                    if cur_piece.rect.colliderect(square):
+                    if cur_piece.rect.colliderect(square) and cur_piece.type != "King":
                         king = King(piece.rect.center[0], piece.rect.center[1], piece.color)
                         cur_piece.kill()
                         pieces.remove(cur_piece)

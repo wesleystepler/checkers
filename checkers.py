@@ -54,6 +54,7 @@ board = pygame.sprite.Group()
 for i in range(0, 8):
     row = []
     for j in range (0, 8):
+        # Arrange the square sprites to create a properly formatted checker board
         if j % 2 == 0 and i % 2 == 0 or j % 2 != 0 and i % 2 != 0:
             cur_tile = WOOD_TILE_1
         else:
@@ -71,18 +72,16 @@ for i in range(0, 8):
 # A generic list of all the pieces we will reference later
 pieces = []
 
-# Two Groups each set of pieces
+# Two Groups for each set of pieces
 red_pieces = pygame.sprite.Group()
 black_pieces = pygame.sprite.Group()
 
+# This nested loop places all the red pieces on the correct squares
 for a in range(0, 2):
     if a == 0:
-        i = 0
-        j = 1
+        i, j = 0, 1
     else:
-        i = 1
-        j = 0
-
+        i, j = 1, 0
     for b in range(0, 4):
         piece = Pawn(0, 0, 'red')
         piece.rect.center = board_reference[i][j].rect.center
@@ -90,23 +89,18 @@ for a in range(0, 2):
         pieces.append(piece)
         j += 2
 
+# This one places all the black pieces on the correct squares
 for a in range(0, 2):
     if a == 0:
-        i = 6
-        j = 1
+        i, j = 6, 1
     else:
-        i = 7
-        j = 0
-
+        i, j = 7, 0
     for b in range(0, 4):
         piece = Pawn(0, 0, 'black')
         piece.rect.center = board_reference[i][j].rect.center
         black_pieces.add(piece)
         pieces.append(piece)
         j += 2
-
-
-
 
 def whose_turn(text, font, text_col, x, y):
     """Helper method that displays whose turn it is on the screen"""
@@ -117,10 +111,15 @@ def whose_turn(text, font, text_col, x, y):
 def midpoint(p1, p2):
     """Helper method that returns the midpoint of a line.
         Used in this program to help determine the outcome of jumps"""
-    
     m1 = int((p1[0] + p2[0])/2)
     m2 = int((p1[1] + p2[1])/2)
     return (m1, m2)
+
+def misc_sounds(file):
+    pygame.mixer.init()
+    pygame.mixer.music.load(file)
+    pygame.mixer.music.set_volume(0.75)
+    pygame.mixer.music.play()
 
 
 def draw_window():
@@ -128,8 +127,10 @@ def draw_window():
   WIN.fill((1,50,32))
   if len(red_pieces) == 0:
       whose_turn("Player 1 Wins!", FONT, (255, 255, 255), 150, 0)
+      misc_sounds(os.path.join('sounds', 'game-over-fanfare.mp3'))
   elif len(black_pieces) == 0:
       whose_turn("Player 2 Wins!", FONT, (255, 255, 255), 150, 0)
+      misc_sounds(os.path.join('sounds', 'game-over-fanfare.mp3'))
   elif P1TURN:
       whose_turn("Player 1, it's your turn!", FONT, (255, 255, 255), 150, 0)
   elif not P1TURN:
@@ -260,22 +261,25 @@ def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, opt
     if abs(cur_square[0] - prev_square[0]) == 2 and abs(prev_square[1] - cur_square[1]) == 2:
         jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn)
 
+
 def king_me(piece, pieces):
     """Delete the Pawn() that has made it to the other side of the board and
         replace it with a King()"""
     king = King(piece.rect.center[0], piece.rect.center[1], piece.color)
     piece.kill()
     pieces.add(king)
+    misc_sounds(os.path.join('sounds', 'king-me-trumpet.mp3'))
 
 
 def deselect(options):
-    """Clear the possible moves list and un-highlight the squares"""
+    """Clear the possible moves list and un-highlight the squares that were in the list."""
     for squares in options:
         squares.image = WOOD_TILE_2
     options.clear()
     return options
 
 def check_for_winner(red_pieces, black_pieces):
+    """Checks if either player has won and returns the appropirate message"""
     if len(black_pieces) == 0:
         return "Player 2 Wins!"
     else:
@@ -302,7 +306,7 @@ def main():
         if event.type == pygame.QUIT:
             running = False 
 
-        # Check if the player has clicked on a valid piece or clicked on an unoccupied square to move to
+        # Check if the player has clicked on a valid piece
         if event.type == pygame.MOUSEBUTTONDOWN and cursor_on_piece(cursor, black_pieces, red_pieces, P1TURN):
             for piece in pieces:
                 if piece.rect.colliderect(cursor):
@@ -310,15 +314,15 @@ def main():
                     piece_selected = True
                     if len(options) != 0:
                         deselect(options)
-
                     options = get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces)
-
                     break
 
+        # Check if the player has clicked on a valid square, and run move() if so.
         # Only allow this to execute if a piece has been selected to prevent any click on a square
         # resulting in a turn ending
         elif piece_selected and event.type == pygame.MOUSEBUTTONDOWN and cursor_on_square(cursor, board_reference, pieces, options):
             move(cur_piece, board_reference, pieces, black_pieces, red_pieces, P1TURN, options) 
+            # Check if either player has earned a King.
             if P1TURN:
                 for square in board_reference[0]:
                     if cur_piece.rect.colliderect(square):
@@ -328,7 +332,11 @@ def main():
                         black_pieces.add(king)
                         cur_piece = king
                         pieces.append(cur_piece)
+                        misc_sounds(os.path.join('sounds', 'king-me-trumpet.mp3'))
                         break
+            # Check if the game is over
+            if len(black_pieces) == 0 or len(red_pieces) == 0:
+                misc_sounds(os.path.join('sounds', 'game-over-fanfare.mp3'))
             else:
                 for square in board_reference[7]:
                     if cur_piece.rect.colliderect(square):
@@ -338,9 +346,10 @@ def main():
                         red_pieces.add(king)
                         cur_piece = king
                         pieces.append(cur_piece)
+                        misc_sounds(os.path.join('sounds', 'king-me-trumpet.mp3'))
                         break
-
             options = deselect(options) 
+
             # It's P1s turn when this is True, and P2s turn when this is False
             P1TURN = not P1TURN  
             piece_selected = False 

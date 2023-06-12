@@ -115,6 +115,7 @@ def midpoint(p1, p2):
     m2 = int((p1[1] + p2[1])/2)
     return (m1, m2)
 
+
 def misc_sounds(file):
     pygame.mixer.init()
     pygame.mixer.music.load(file)
@@ -208,6 +209,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
     while can_jump:
         #print(i, j)
         moves = 0
+        # Look at each possible direction and, if there's a move available, add it to possible_moves
         if (i1+2) < len(board_reference) and (j1+2) < len(board_reference[i1]):
             if not board_reference[i1+2][j1+2].occupied(pieces):
                 for p in pieces:
@@ -239,7 +241,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                         i3 -= 2
                         j3 += 2
                         break
-                    
+
         if (i4-2) >= 0 and (j4-2) >= 0:
             if not board_reference[i4-2][j4-2].occupied(pieces):
                 for p in pieces:
@@ -264,22 +266,41 @@ def cursor_on_square(cursor, board_reference, pieces, options):
                 return True
     return False
 
+def get_path(p1, p2, board_reference):
+    """Method that returns all the squares a piece traversed during a given move."""
+    path = []
+    if (p2[0] - p1[0]) < 0 and (p2[1] - p1[1]) < 0:
+        for i in range(0, abs(p2[0] - p1[0])):
+            path.append(board_reference[p1[0]-i][p1[1]-i])
+    elif (p2[0] - p1[0]) > 0 and (p2[1] - p1[1]) < 0:
+        for i in range(0, abs(p2[0] - p1[0])):
+            path.append(board_reference[p1[0]+i][p1[1]-i])
+    elif (p2[0] - p1[0]) < 0 and (p2[1] - p1[1]) > 0:
+        for i in range(0, abs(p2[0] - p1[0])):
+            path.append(board_reference[p1[0]-i][p1[1]+i])
+    elif (p2[0] - p1[0]) > 0 and (p2[1] - p1[1]) > 0:
+        for i in range(0, abs(p2[0] - p1[0])):
+            path.append(board_reference[p1[0]+i][p1[1]+i])
+    return path
+
 
 def jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn):
-    mid_square = midpoint(cur_square, prev_square)
-    i, j = mid_square[0], mid_square[1]
-    taken = board_reference[i][j]
+    #mid_square = midpoint(cur_square, prev_square)
+    #taken = board_reference[i][j]
+    path = get_path(prev_square, cur_square, board_reference)
+    print(path)
     if turn:
         for piece in red_pieces:
-            if piece.rect.colliderect(taken):
-                piece.kill()
-                pieces.remove(piece)
+            for square in path:
+                if piece.rect.colliderect(square):
+                    piece.kill()
+                    pieces.remove(piece)
     else:
         for piece in black_pieces:
-            if piece.rect.colliderect(taken):
-                piece.kill()
-                pieces.remove(piece)
-
+            for square in path:
+                if piece.rect.colliderect(square):
+                    piece.kill()
+                    pieces.remove(piece)
 
 
 def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, options):
@@ -292,7 +313,7 @@ def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, opt
             cur_piece.fx()
             break
     cur_square = get_current_square(cur_piece, board_reference)
-    if abs(cur_square[0] - prev_square[0]) == 2 and abs(prev_square[1] - cur_square[1]) == 2:
+    if abs(cur_square[0] - prev_square[0]) > 1 or abs(prev_square[1] - cur_square[1]) > 1:
         jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn)
 
 

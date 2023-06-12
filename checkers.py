@@ -144,7 +144,6 @@ def draw_window():
   pygame.display.flip()
 
 
-
 def get_current_square(piece, board_reference):
     """Returns the i and j indicies of the square the selected piece is currently on"""
     for i in range(0, len(board_reference)):
@@ -156,6 +155,7 @@ def get_current_square(piece, board_reference):
 def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces):
     """Returns all possible moves for a given piece and highlights them on the board"""
     possible_moves = []
+    path1, path2, path3, path4 = [], [], [], []
     for i in range(0, len(board_reference)):
         for j in range(0, len(board_reference[i])):
             if board_reference[i][j].rect.colliderect(piece):
@@ -163,29 +163,34 @@ def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces)
                 if piece.color == 'red' or piece.type == "King":
                     if (j+1) < len(board_reference[i]) and (i + 1) < len(board_reference):
                         if not board_reference[i+1][j+1].occupied(pieces):
-                            possible_moves.append(board_reference[i+1][j+1])
-                        possible_moves = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+                            path1.append(board_reference[i+1][j+1])
+                        path1 = get_available_jumps(piece, board_reference, pieces, i, j, path1)
 
                     if (j-1) >= 0 and (i + 1) < len(board_reference):
                         if not board_reference[i+1][j-1].occupied(pieces):
-                            possible_moves.append(board_reference[i+1][j-1])
-                        possible_moves = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+                            path2.append(board_reference[i+1][j-1])
+                        path2 = get_available_jumps(piece, board_reference, pieces, i, j, path2)
 
 
                 if piece.color == 'black' or piece.type == "King":
                     if (j+1) < len(board_reference[i]) and (i - 1) >= 0:
                         if not board_reference[i-1][j+1].occupied(pieces):
-                            possible_moves.append(board_reference[i-1][j+1])
-                        possible_moves = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+                            path3.append(board_reference[i-1][j+1])
+                        path3 = get_available_jumps(piece, board_reference, pieces, i, j, path3)
                                             
                     if (j-1) >= 0 and (i - 1) >= 0:
                         if not board_reference[i-1][j-1].occupied(pieces):
-                            possible_moves.append(board_reference[i-1][j-1])
-
-                        possible_moves = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+                            path4.append(board_reference[i-1][j-1])
+                        path4 = get_available_jumps(piece, board_reference, pieces, i, j, path4)
                 break
-    for move in possible_moves:
-        move.image = POSSIBLE_MOVE
+    possible_moves.append(path1)
+    possible_moves.append(path2)
+    possible_moves.append(path3)
+    possible_moves.append(path4)
+
+    for path in possible_moves:
+        for move in path:
+            move.image = POSSIBLE_MOVE
     return possible_moves
 
 def cursor_on_piece(cursor, black_pieces, red_pieces, turn):
@@ -262,8 +267,9 @@ def cursor_on_square(cursor, board_reference, pieces, options):
     """ Checks if the cursor is over an open square on the board"""
     for i in range(0, len(board_reference)):
         for j in range(0, len(board_reference[i])):
-            if board_reference[i][j].rect.colliderect(cursor) and not board_reference[i][j].occupied(pieces) and board_reference[i][j] in options:
-                return True
+            for path in options:
+                if board_reference[i][j].rect.colliderect(cursor) and not board_reference[i][j].occupied(pieces) and board_reference[i][j] in path:
+                    return True
     return False
 
 def get_path(p1, p2, board_reference):
@@ -307,11 +313,12 @@ def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, opt
     """Moves a given piece to the selected available square"""
     prev_square = get_current_square(cur_piece, board_reference)
 
-    for i in range(0, len(options)):
-        if options[i].rect.colliderect(cursor):
-            cur_piece.rect.center = options[i].rect.center
-            cur_piece.fx()
-            break
+    for path in options:
+        for i in range(0, len(path)):
+            if path[i].rect.colliderect(cursor):
+                cur_piece.rect.center = path[i].rect.center
+                cur_piece.fx()
+                break
     cur_square = get_current_square(cur_piece, board_reference)
     if abs(cur_square[0] - prev_square[0]) > 1 or abs(prev_square[1] - cur_square[1]) > 1:
         jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn)
@@ -328,8 +335,9 @@ def king_me(piece, pieces):
 
 def deselect(options):
     """Clear the possible moves list and un-highlight the squares that were in the list."""
-    for squares in options:
-        squares.image = WOOD_TILE_2
+    for path in options:
+        for squares in path:
+            squares.image = WOOD_TILE_2
     options.clear()
     return options
 

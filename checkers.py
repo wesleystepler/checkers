@@ -108,14 +108,6 @@ def whose_turn(text, font, text_col, x, y):
     WIN.blit(img, (x,y))
 
 
-def midpoint(p1, p2):
-    """Helper method that returns the midpoint of a line.
-        Used in this program to help determine the outcome of jumps"""
-    m1 = int((p1[0] + p2[0])/2)
-    m2 = int((p1[1] + p2[1])/2)
-    return (m1, m2)
-
-
 def misc_sounds(file):
     pygame.mixer.init()
     pygame.mixer.music.load(file)
@@ -291,10 +283,7 @@ def get_path(p1, p2, board_reference):
 
 
 def jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn):
-    #mid_square = midpoint(cur_square, prev_square)
-    #taken = board_reference[i][j]
     path = get_path(prev_square, cur_square, board_reference)
-    print(path)
     if turn:
         for piece in red_pieces:
             for square in path:

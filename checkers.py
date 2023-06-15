@@ -155,37 +155,35 @@ def get_current_square(piece, board_reference):
 
 def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces):
     """Returns all possible moves for a given piece and highlights them on the board"""
-    possible_moves = []
-    for i in range(0, len(board_reference)):
-        for j in range(0, len(board_reference[i])):
-            if board_reference[i][j].rect.colliderect(piece):
+    p1, p2, p3, p4 = [], [], [], []
+    coords = get_current_square(piece, board_reference)
+    i, j = coords[0], coords[1]
 
-                if piece.color == 'red' or piece.type == "King":
-                    if (j+1) < len(board_reference[i]) and (i + 1) < len(board_reference):
-                        if not board_reference[i+1][j+1].occupied(pieces):
-                            possible_moves.append(board_reference[i+1][j+1])
-                        possible_moves = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+    if piece.color == 'red' or piece.type == "King":
+        if (j+1) < len(board_reference[i]) and (i + 1) < len(board_reference):
+            if not board_reference[i+1][j+1].occupied(pieces):
+                p1.append(board_reference[i+1][j+1])
+            p1 = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
 
-                    if (j-1) >= 0 and (i + 1) < len(board_reference):
-                        if not board_reference[i+1][j-1].occupied(pieces):
-                            possible_moves.append(board_reference[i+1][j-1])
-                        possible_moves = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+        if (j-1) >= 0 and (i + 1) < len(board_reference):
+            if not board_reference[i+1][j-1].occupied(pieces):
+                p2.append(board_reference[i+1][j-1])
+            p2 = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
 
-
-                if piece.color == 'black' or piece.type == "King":
-                    if (j+1) < len(board_reference[i]) and (i - 1) >= 0:
-                        if not board_reference[i-1][j+1].occupied(pieces):
-                            possible_moves.append(board_reference[i-1][j+1])
-                        possible_moves = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
-                                            
-                    if (j-1) >= 0 and (i - 1) >= 0:
-                        if not board_reference[i-1][j-1].occupied(pieces):
-                            possible_moves.append(board_reference[i-1][j-1])
-
-                        possible_moves = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
-                break
-    for move in possible_moves:
-        move.image = POSSIBLE_MOVE
+    if piece.color == 'black' or piece.type == "King":
+        if (j+1) < len(board_reference[i]) and (i - 1) >= 0:
+            if not board_reference[i-1][j+1].occupied(pieces):
+                p3.append(board_reference[i-1][j+1])
+            p3 = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+                                
+        if (j-1) >= 0 and (i - 1) >= 0:
+            if not board_reference[i-1][j-1].occupied(pieces):
+                p4.append(board_reference[i-1][j-1])
+            p4 = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+    possible_moves = [p1, p2, p3, p4]
+    for path in possible_moves:
+        for move in path:
+            move.image = POSSIBLE_MOVE
     return possible_moves
 
 def cursor_on_piece(cursor, black_pieces, red_pieces, turn):

@@ -213,11 +213,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                 if not board_reference[i1+2][j1+2].occupied(pieces):
                     for p in pieces:
                         if p.rect.colliderect(board_reference[i1+1][j1+1]) and p.color != cur_piece.color:
-                            possible_moves.append(board_reference[i1+2][j1+2])
-                            moves += 1
-                            i1 += 2
-                            j1 += 2
-                            break
+                            get_available_jumps(cur_piece, board_reference, pieces, i+2, j+2)
 
             if (i2+2) < len(board_reference) and (j2-2) >= 0:
                 if not board_reference[i2+2][j2-2].occupied(pieces):

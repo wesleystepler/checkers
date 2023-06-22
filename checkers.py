@@ -205,7 +205,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
     while len(queue) > 0:
         i, j = queue[0][0], queue[0][1]
         queue.remove(queue[0])
-        #print(i, j)
+        print(i, j)
         moves = 0
         # Look at each possible direction and, if there's a move available, add it to possible_moves
         if cur_piece.color == 'red' or cur_piece.type == "King":
@@ -213,6 +213,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                 if not board_reference[i+2][j+2].occupied(pieces):
                     for p in pieces:
                         if p.rect.colliderect(board_reference[i+1][j+1]) and p.color != cur_piece.color:
+                            possible_moves.append(board_reference[i+1][j+1])
                             possible_moves.append(board_reference[i+2][j+2])
                             queue.append((i+2, j+2))
                             
@@ -222,6 +223,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                     for p in pieces:
                         #print(i2, j2)
                         if p.rect.colliderect(board_reference[i+1][j-1]) and p.color != cur_piece.color:
+                            possible_moves.append(board_reference[i+1][j-1])
                             possible_moves.append(board_reference[i+2][j-2])
                             queue.append((i+2, j-2))
                             
@@ -232,6 +234,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                     for p in pieces:
                         #print(i3, j3)
                         if p.rect.colliderect(board_reference[i-1][j+1]) and p.color != cur_piece.color:
+                            possible_moves.append(board_reference[i-1][j+1])
                             possible_moves.append(board_reference[i-2][j+2])
                             queue.append((i-2, j+2))
                             
@@ -240,6 +243,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                 if not board_reference[i-2][j-2].occupied(pieces):
                     for p in pieces:
                         if p.rect.colliderect(board_reference[i-1][j-1]) and p.color != cur_piece.color:
+                            possible_moves.append(board_reference[i-1][j-1])
                             possible_moves.append(board_reference[i-2][j-2])
                             queue.append((i-2, j-2))
 
@@ -255,29 +259,9 @@ def cursor_on_square(cursor, board_reference, pieces, options):
                     return True
     return False
 
-def get_path(p1, p2, board_reference):
-    """Method that returns all the squares a piece traversed during a given move."""
-    path = []
-    if (p2[0] - p1[0]) < 0 and (p2[1] - p1[1]) < 0:
-        for i in range(0, abs(p2[0] - p1[0])):
-            path.append(board_reference[p1[0]-i][p1[1]-i])
-    elif (p2[0] - p1[0]) > 0 and (p2[1] - p1[1]) < 0:
-        for i in range(0, abs(p2[0] - p1[0])):
-            path.append(board_reference[p1[0]+i][p1[1]-i])
-    elif (p2[0] - p1[0]) < 0 and (p2[1] - p1[1]) > 0:
-        for i in range(0, abs(p2[0] - p1[0])):
-            path.append(board_reference[p1[0]-i][p1[1]+i])
-    elif (p2[0] - p1[0]) > 0 and (p2[1] - p1[1]) > 0:
-        for i in range(0, abs(p2[0] - p1[0])):
-            path.append(board_reference[p1[0]+i][p1[1]+i])
-    return path
 
+def jump(pieces, black_pieces, red_pieces, path, turn):
 
-def jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn):
-    #mid_square = midpoint(cur_square, prev_square)
-    #taken = board_reference[i][j]
-    path = get_path(prev_square, cur_square, board_reference)
-    #print(path)
     if turn:
         for piece in red_pieces:
             for square in path:
@@ -295,16 +279,16 @@ def jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_piec
 def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, options):
     """Moves a given piece to the selected available square"""
     prev_square = get_current_square(cur_piece, board_reference)
-
     for i in range(0, len(options)):
         for square in options[i]:
             if square.rect.colliderect(cursor):
                 cur_piece.rect.center = square.rect.center
                 cur_piece.fx()
+                taken_path = options[i]
                 break
     cur_square = get_current_square(cur_piece, board_reference)
     if abs(cur_square[0] - prev_square[0]) > 1 or abs(prev_square[1] - cur_square[1]) > 1:
-        jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn)
+        jump(pieces, black_pieces, red_pieces, taken_path, turn)
 
 
 def king_me(piece, pieces):

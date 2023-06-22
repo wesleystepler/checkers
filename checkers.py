@@ -261,7 +261,6 @@ def cursor_on_square(cursor, board_reference, pieces, options):
 
 
 def jump(pieces, black_pieces, red_pieces, path, turn):
-
     if turn:
         for piece in red_pieces:
             for square in path:
@@ -278,14 +277,19 @@ def jump(pieces, black_pieces, red_pieces, path, turn):
 
 def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, options):
     """Moves a given piece to the selected available square"""
+    moved = False
     prev_square = get_current_square(cur_piece, board_reference)
     for i in range(0, len(options)):
+        taken_path = []
         for square in options[i]:
+            taken_path.append(square)
             if square.rect.colliderect(cursor):
                 cur_piece.rect.center = square.rect.center
+                moved = True
                 cur_piece.fx()
-                taken_path = options[i]
                 break
+        if moved:
+            break
     cur_square = get_current_square(cur_piece, board_reference)
     if abs(cur_square[0] - prev_square[0]) > 1 or abs(prev_square[1] - cur_square[1]) > 1:
         jump(pieces, black_pieces, red_pieces, taken_path, turn)

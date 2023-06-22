@@ -163,23 +163,23 @@ def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces)
         if (j+1) < len(board_reference[i]) and (i + 1) < len(board_reference):
             if not board_reference[i+1][j+1].occupied(pieces):
                 p1.append(board_reference[i+1][j+1])
-            p1 = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+            p1 = get_available_jumps(piece, board_reference, pieces, i, j, p1)
 
         if (j-1) >= 0 and (i + 1) < len(board_reference):
             if not board_reference[i+1][j-1].occupied(pieces):
                 p2.append(board_reference[i+1][j-1])
-            p2 = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+            p2 = get_available_jumps(piece, board_reference, pieces, i, j, p2)
 
     if piece.color == 'black' or piece.type == "King":
         if (j+1) < len(board_reference[i]) and (i - 1) >= 0:
             if not board_reference[i-1][j+1].occupied(pieces):
                 p3.append(board_reference[i-1][j+1])
-            p3 = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+            p3 = get_available_jumps(piece, board_reference, pieces, i, j, p3)
                                 
         if (j-1) >= 0 and (i - 1) >= 0:
             if not board_reference[i-1][j-1].occupied(pieces):
                 p4.append(board_reference[i-1][j-1])
-            p4 = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves)
+            p4 = get_available_jumps(piece, board_reference, pieces, i, j, p4)
     possible_moves = [p1, p2, p3, p4]
     for path in possible_moves:
         for move in path:
@@ -201,54 +201,47 @@ def cursor_on_piece(cursor, black_pieces, red_pieces, turn):
 
 
 def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves):
-    can_jump = True
-    i1, i2, i3, i4 = i, i, i, i
-    j1, j2, j3, j4 = j, j, j, j
-    while can_jump:
+    queue = [(i, j)]
+    while len(queue) > 0:
+        i, j = queue[0][0], queue[0][1]
+        queue.remove(queue[0])
         #print(i, j)
         moves = 0
         # Look at each possible direction and, if there's a move available, add it to possible_moves
         if cur_piece.color == 'red' or cur_piece.type == "King":
-            if (i1+2) < len(board_reference) and (j1+2) < len(board_reference[i1]):
-                if not board_reference[i1+2][j1+2].occupied(pieces):
+            if (i+2) < len(board_reference) and (j+2) < len(board_reference[i]):
+                if not board_reference[i+2][j+2].occupied(pieces):
                     for p in pieces:
-                        if p.rect.colliderect(board_reference[i1+1][j1+1]) and p.color != cur_piece.color:
-                            get_available_jumps(cur_piece, board_reference, pieces, i+2, j+2)
+                        if p.rect.colliderect(board_reference[i+1][j+1]) and p.color != cur_piece.color:
+                            possible_moves.append(board_reference[i+2][j+2])
+                            queue.append((i+2, j+2))
+                            
 
-            if (i2+2) < len(board_reference) and (j2-2) >= 0:
-                if not board_reference[i2+2][j2-2].occupied(pieces):
+            if (i+2) < len(board_reference) and (j-2) >= 0:
+                if not board_reference[i+2][j-2].occupied(pieces):
                     for p in pieces:
                         #print(i2, j2)
-                        if p.rect.colliderect(board_reference[i2+1][j2-1]) and p.color != cur_piece.color:
-                            possible_moves.append(board_reference[i2+2][j2-2])
-                            moves += 1
-                            i2 += 2
-                            j2 -= 2
-                            break
+                        if p.rect.colliderect(board_reference[i+1][j-1]) and p.color != cur_piece.color:
+                            possible_moves.append(board_reference[i+2][j-2])
+                            queue.append((i+2, j-2))
+                            
+
         if cur_piece.color == 'black' or cur_piece.type == "King":
-            if (i3-2) >= 0 and (j3+2) < len(board_reference[i]):
-                if not board_reference[i3-2][j3+2].occupied(pieces):
+            if (i-2) >= 0 and (j+2) < len(board_reference[i]):
+                if not board_reference[i-2][j+2].occupied(pieces):
                     for p in pieces:
                         #print(i3, j3)
-                        if p.rect.colliderect(board_reference[i3-1][j3+1]) and p.color != cur_piece.color:
-                            possible_moves.append(board_reference[i3-2][j3+2])
-                            moves += 1
-                            i3 -= 2
-                            j3 += 2
-                            break
+                        if p.rect.colliderect(board_reference[i-1][j+1]) and p.color != cur_piece.color:
+                            possible_moves.append(board_reference[i-2][j+2])
+                            queue.append((i-2, j+2))
+                            
 
-            if (i4-2) >= 0 and (j4-2) >= 0:
-                if not board_reference[i4-2][j4-2].occupied(pieces):
+            if (i-2) >= 0 and (j-2) >= 0:
+                if not board_reference[i-2][j-2].occupied(pieces):
                     for p in pieces:
-                        if p.rect.colliderect(board_reference[i4-1][j4-1]) and p.color != cur_piece.color:
-                            possible_moves.append(board_reference[i4-2][j4-2])
-                            moves += 1
-                            i4 -= 2
-                            j4 -= 2
-                            break
-
-        if moves == 0:
-            can_jump = False
+                        if p.rect.colliderect(board_reference[i-1][j-1]) and p.color != cur_piece.color:
+                            possible_moves.append(board_reference[i-2][j-2])
+                            queue.append((i-2, j-2))
 
     return possible_moves
 
@@ -257,8 +250,9 @@ def cursor_on_square(cursor, board_reference, pieces, options):
     """ Checks if the cursor is over an open square on the board"""
     for i in range(0, len(board_reference)):
         for j in range(0, len(board_reference[i])):
-            if board_reference[i][j].rect.colliderect(cursor) and not board_reference[i][j].occupied(pieces) and board_reference[i][j] in options:
-                return True
+            for moves in options:
+                if board_reference[i][j].rect.colliderect(cursor) and not board_reference[i][j].occupied(pieces) and board_reference[i][j] in moves:
+                    return True
     return False
 
 def get_path(p1, p2, board_reference):
@@ -283,7 +277,7 @@ def jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_piec
     #mid_square = midpoint(cur_square, prev_square)
     #taken = board_reference[i][j]
     path = get_path(prev_square, cur_square, board_reference)
-    print(path)
+    #print(path)
     if turn:
         for piece in red_pieces:
             for square in path:
@@ -303,10 +297,11 @@ def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, opt
     prev_square = get_current_square(cur_piece, board_reference)
 
     for i in range(0, len(options)):
-        if options[i].rect.colliderect(cursor):
-            cur_piece.rect.center = options[i].rect.center
-            cur_piece.fx()
-            break
+        for square in options[i]:
+            if square.rect.colliderect(cursor):
+                cur_piece.rect.center = square.rect.center
+                cur_piece.fx()
+                break
     cur_square = get_current_square(cur_piece, board_reference)
     if abs(cur_square[0] - prev_square[0]) > 1 or abs(prev_square[1] - cur_square[1]) > 1:
         jump(cur_piece, prev_square, cur_square, board_reference, pieces, black_pieces, red_pieces, turn)
@@ -323,8 +318,9 @@ def king_me(piece, pieces):
 
 def deselect(options):
     """Clear the possible moves list and un-highlight the squares that were in the list."""
-    for squares in options:
-        squares.image = WOOD_TILE_2
+    for row in options:
+        for squares in row:
+            squares.image = WOOD_TILE_2
     options.clear()
     return options
 

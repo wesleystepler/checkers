@@ -24,8 +24,6 @@ class CheckerSquare(pygame.sprite.Sprite):
             if self.rect.colliderect(piece):
                 return True
         return False
-
-
     
     def __str__(self):
         return f"Checker Square a position ({self.x_pos}, {self.y_pos})"

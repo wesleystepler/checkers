@@ -180,24 +180,22 @@ def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces)
             if not board_reference[i-1][j-1].occupied(pieces):
                 p4.append(board_reference[i-1][j-1])
             p4 = get_available_jumps(piece, board_reference, pieces, i, j, p4)
+    
     possible_moves = [p1, p2, p3, p4]
+    best_move = max(possible_moves, key=len)
+    if len(best_move) > 1:
+        revised_moves = [best_move]
+        for path in possible_moves:
+            if len(path) > 1:
+                revised_moves.append(path)
+        possible_moves = revised_moves
+
+
+
     for path in possible_moves:
         for move in path:
             move.image = POSSIBLE_MOVE
     return possible_moves
-
-def cursor_on_piece(cursor, black_pieces, red_pieces, turn):
-    """ Checks if the cursor is over a piece on the board. Will
-        only return True if it's a piece that belongs to the correct player."""
-    if turn:
-        for piece in black_pieces:
-            if piece.rect.colliderect(cursor):
-                return True
-    else:
-        for piece in red_pieces:
-            if piece.rect.colliderect(cursor):
-                return True
-    return False
 
 
 def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves):
@@ -212,7 +210,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
             if (i+2) < len(board_reference) and (j+2) < len(board_reference[i]):
                 if not board_reference[i+2][j+2].occupied(pieces):
                     for p in pieces:
-                        if p.rect.colliderect(board_reference[i+1][j+1]) and p.color != cur_piece.color and board_reference[i+2][j+2] not in possible_moves:
+                        if p.rect.colliderect(board_reference[i+1][j+1]) and p.color != cur_piece.color and board_reference[i+1][j+1] not in possible_moves and board_reference[i+2][j+2] not in possible_moves:
                             possible_moves.append(board_reference[i+1][j+1])
                             possible_moves.append(board_reference[i+2][j+2])
                             if (i+2, j+2) not in queue:
@@ -223,7 +221,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                 if not board_reference[i+2][j-2].occupied(pieces):
                     for p in pieces:
                         #print(i2, j2)
-                        if p.rect.colliderect(board_reference[i+1][j-1]) and p.color != cur_piece.color and board_reference[i+2][j-2] not in possible_moves:
+                        if p.rect.colliderect(board_reference[i+1][j-1]) and p.color != cur_piece.color and board_reference[i+1][j-1] not in possible_moves and board_reference[i+2][j-2] not in possible_moves:
                             possible_moves.append(board_reference[i+1][j-1])
                             possible_moves.append(board_reference[i+2][j-2])
                             if (i+2, j-2) not in queue:
@@ -235,7 +233,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                 if not board_reference[i-2][j+2].occupied(pieces):
                     for p in pieces:
                         #print(i3, j3)
-                        if p.rect.colliderect(board_reference[i-1][j+1]) and p.color != cur_piece.color and board_reference[i-2][j+2] not in possible_moves:
+                        if p.rect.colliderect(board_reference[i-1][j+1]) and p.color != cur_piece.color and board_reference[i-1][j+1] not in possible_moves and board_reference[i-2][j+2] not in possible_moves:
                             possible_moves.append(board_reference[i-1][j+1])
                             possible_moves.append(board_reference[i-2][j+2])
                             if (i-2, j+2) not in queue:
@@ -245,7 +243,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
             if (i-2) >= 0 and (j-2) >= 0:
                 if not board_reference[i-2][j-2].occupied(pieces):
                     for p in pieces:
-                        if p.rect.colliderect(board_reference[i-1][j-1]) and p.color != cur_piece.color and board_reference[i-2][j-2] not in possible_moves:
+                        if p.rect.colliderect(board_reference[i-1][j-1]) and p.color != cur_piece.color and board_reference[i-1][j-1] not in possible_moves and board_reference[i-2][j-2] not in possible_moves:
                             possible_moves.append(board_reference[i-1][j-1])
                             possible_moves.append(board_reference[i-2][j-2])
                             if (i-2, j-2) not in queue:
@@ -254,6 +252,18 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
     return possible_moves
 
 
+def cursor_on_piece(cursor, black_pieces, red_pieces, turn):
+    """ Checks if the cursor is over a piece on the board. Will
+        only return True if it's a piece that belongs to the correct player."""
+    if turn:
+        for piece in black_pieces:
+            if piece.rect.colliderect(cursor):
+                return True
+    else:
+        for piece in red_pieces:
+            if piece.rect.colliderect(cursor):
+                return True
+    return False
 def cursor_on_square(cursor, board_reference, pieces, options):
     """ Checks if the cursor is over an open square on the board"""
     for i in range(0, len(board_reference)):

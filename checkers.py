@@ -155,33 +155,36 @@ def get_current_square(piece, board_reference):
 
 def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces):
     """Returns all possible moves for a given piece and highlights them on the board"""
-    p1, p2, p3, p4 = [], [], [], []
+    possible_moves = [[], [], [], []]
     coords = get_current_square(piece, board_reference)
     i, j = coords[0], coords[1]
 
     if piece.color == 'red' or piece.type == "King":
         if (j+1) < len(board_reference[i]) and (i + 1) < len(board_reference):
             if not board_reference[i+1][j+1].occupied(pieces):
-                p1.append(board_reference[i+1][j+1])
-            p1 = get_available_jumps(piece, board_reference, pieces, i, j, p1)
+                possible_moves[0].append(board_reference[i+1][j+1])
+            else:
+                possible_moves[0] = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves[0])
 
         if (j-1) >= 0 and (i + 1) < len(board_reference):
             if not board_reference[i+1][j-1].occupied(pieces):
-                p2.append(board_reference[i+1][j-1])
-            p2 = get_available_jumps(piece, board_reference, pieces, i, j, p2)
+                possible_moves[1].append(board_reference[i+1][j-1])
+            else:
+                possible_moves[1] = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves[1])
 
     if piece.color == 'black' or piece.type == "King":
         if (j+1) < len(board_reference[i]) and (i - 1) >= 0:
             if not board_reference[i-1][j+1].occupied(pieces):
-                p3.append(board_reference[i-1][j+1])
-            p3 = get_available_jumps(piece, board_reference, pieces, i, j, p3)
+                possible_moves[2].append(board_reference[i-1][j+1])
+            else:
+                possible_moves[2] = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves[2])
                                 
         if (j-1) >= 0 and (i - 1) >= 0:
             if not board_reference[i-1][j-1].occupied(pieces):
-                p4.append(board_reference[i-1][j-1])
-            p4 = get_available_jumps(piece, board_reference, pieces, i, j, p4)
+                possible_moves[3].append(board_reference[i-1][j-1])
+            else:
+                possible_moves[3] = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves[3])
     
-    possible_moves = [p1, p2, p3, p4]
     best_move = max(possible_moves, key=len)
     if len(best_move) > 1:
         revised_moves = [best_move]
@@ -202,7 +205,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
     queue = [(i, j)]
     while len(queue) > 0:
         i, j = queue[0][0], queue[0][1]
-        print(queue)
+        #print(queue)
         queue.remove(queue[0])
         moves = 0
         # Look at each possible direction and, if there's a move available, add it to possible_moves
@@ -215,6 +218,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                             possible_moves.append(board_reference[i+2][j+2])
                             if (i+2, j+2) not in queue:
                                 queue.append((i+2, j+2))
+                                break
                             
 
             if (i+2) < len(board_reference) and (j-2) >= 0:
@@ -226,6 +230,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                             possible_moves.append(board_reference[i+2][j-2])
                             if (i+2, j-2) not in queue:
                                 queue.append((i+2, j-2))
+                                break
                             
 
         if cur_piece.color == 'black' or cur_piece.type == "King":
@@ -238,6 +243,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                             possible_moves.append(board_reference[i-2][j+2])
                             if (i-2, j+2) not in queue:
                                 queue.append((i-2, j+2))
+                                break
                             
 
             if (i-2) >= 0 and (j-2) >= 0:
@@ -248,6 +254,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                             possible_moves.append(board_reference[i-2][j-2])
                             if (i-2, j-2) not in queue:
                                 queue.append((i-2, j-2))
+                                break
 
     return possible_moves
 

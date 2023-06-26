@@ -13,11 +13,13 @@ BLACK_PAWN = pygame.transform.scale(BLACK_PAWN_IMAGE, (60, 60))
 BLACK_KING = pygame.transform.scale(BLACK_KING_IMAGE, (60, 60))
 
 class CheckerSquare(pygame.sprite.Sprite):
-    def __init__(self, x_pos, y_pos, tile):
+    def __init__(self, x_pos, y_pos, tile, i, j):
         super().__init__()
         self.image = tile
         self.rect = self.image.get_rect()
         self.rect.topleft = [x_pos, y_pos]
+        self.i = i
+        self.j = j
 
     def occupied(self, pieces):
         for piece in pieces:
@@ -26,7 +28,7 @@ class CheckerSquare(pygame.sprite.Sprite):
         return False
     
     def __str__(self):
-        return f"Checker Square a position ({self.x_pos}, {self.y_pos})"
+        return f"Checker Square a position ({self.i}, {self.j})"
 
 class Pawn(pygame.sprite.Sprite):
     def __init__(self, x_pos, y_pos, color) -> None:

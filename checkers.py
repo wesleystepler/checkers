@@ -108,14 +108,6 @@ def whose_turn(text, font, text_col, x, y):
     WIN.blit(img, (x,y))
 
 
-def midpoint(p1, p2):
-    """Helper method that returns the midpoint of a line.
-        Used in this program to help determine the outcome of jumps"""
-    m1 = int((p1[0] + p2[0])/2)
-    m2 = int((p1[1] + p2[1])/2)
-    return (m1, m2)
-
-
 def misc_sounds(file):
     pygame.mixer.init()
     pygame.mixer.music.load(file)
@@ -145,58 +137,35 @@ def draw_window():
 
 
 
-def get_current_square(type, obj, board_reference):
-    """Returns the i and j indicies of either the square the selected piece is currently on, or any square on the board"""
-    if type == 'piece':
-        for i in range(0, len(board_reference)):
-            for j in range(0, len(board_reference[i])):
-                if obj.rect.colliderect(board_reference[i][j]):
-                    return (i, j)
-                
-    elif type == 'square':
-        for i in range(0, len(board_reference)):
-            for j in range(0, len(board_reference[i])):
-                if obj == board_reference[i][j]:
-                    return (i, j)
-                
-    else:
-        Exception("Invalid Parameter: Please enter either 'piece' or 'square' for get_current_square type argument")
-    
+def get_current_square(piece, board_reference):
+    """Returns the i and j indicies of either the square the selected piece is currently on"""
+    for i in range(0, len(board_reference)):
+        for j in range(0, len(board_reference[i])):
+            if piece.rect.colliderect(board_reference[i][j]):
+                return (i, j)
             
-def split_paths(paths):
-    new_paths = []
-    for i in range(0, len(paths)):
-        path1 = []
-        path2 = []
-        for j in range(0, len(paths[i])-1):
-            path1.append(paths[i][j])
-            if abs(paths[i][j].i - paths[i][j+1].i) >= 2 and abs(paths[i][j].j - paths[i][j+1].j) >= 2:
-                split_point = paths[i][j+1]
-                for square in path1:
-                    if abs(square.i - split_point.i) == 1 and abs(square.j - split_point.j) == 1:
-                        path2.append(square)
-                        break
-                    path2.append(square)
-                if paths[i][j] not in path1:
-                    path2.append(paths[i][j])
-
-                new_paths.append(path1)
-                new_paths.append(path2)
-                break
-
-    if len(new_paths) > 0:
-        for path in paths:
-            if path == new_paths[0]+new_paths[1]:
-                paths.remove(path)
-                break
-        paths.extend(new_paths)
-    return paths
+def split_paths(path, board_reference):
+    coords = []
+    split_points = []
+    for square in path:
+        coords.append((square.i, square.j))
+    for tup in coords:
+        if ((tup[0]+1, tup[1]-1) in coords and (tup[0]-1, tup[1]+1) in coords) or ((tup[0]+1, tup[1]+1) in coords and (tup[0]-1, tup[1]-1) in coords):
+            if (board_reference[tup[0]+1][tup[1]-1].occupied and board_reference[tup[0]-1][tup[1]+1].occupied) or (board_reference[tup[0]+1][tup[1]+1].occupied and board_reference[tup[0]-1][tup[1]-1].occupied):
+                split_points.append(board_reference[tup[0]][tup[1]])
     
+    #new_paths = [[]]*(len(split_points)+1)
+    #while len(split_points) != 0:
+
+        
+
+
+            
 
 def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces):
     """Returns all possible moves for a given piece and highlights them on the board"""
     possible_moves = [[], [], [], []]
-    coords = get_current_square('piece', piece, board_reference)
+    coords = get_current_square(piece, board_reference)
     i, j = coords[0], coords[1]
 
     if piece.color == 'red' or piece.type == "King":
@@ -225,8 +194,8 @@ def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces)
             else:
                 possible_moves[3] = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves[3])
     
-    # Check if any of the paths diverge and need to be split into two paths
-    possible_moves = split_paths(possible_moves)
+    # Check if any of the four paths diverge and need to be split into multiple paths
+ 
 
     # If one or more jumps are available, force the user to take one of them
     best_move = max(possible_moves, key=len)
@@ -296,6 +265,7 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
                                 queue.append((i-2, j-2))
                                 break
 
+    split_paths(possible_moves, board_reference)
     return possible_moves
 
 
@@ -326,7 +296,7 @@ def cursor_on_square(cursor, board_reference, pieces, options):
 def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, options):
     """Moves a given piece to the selected available square"""
     moved = False
-    prev_square = get_current_square('piece', cur_piece, board_reference)
+    prev_square = get_current_square(cur_piece, board_reference)
     for i in range(0, len(options)):
         taken_path = []
         for square in options[i]:
@@ -339,7 +309,7 @@ def move(cur_piece, board_reference, pieces, black_pieces, red_pieces, turn, opt
         if moved:
             break
 
-    cur_square = get_current_square('piece', cur_piece, board_reference)
+    cur_square = get_current_square(cur_piece, board_reference)
     if abs(cur_square[0] - prev_square[0]) > 1 or abs(prev_square[1] - cur_square[1]) > 1:
         jump(pieces, black_pieces, red_pieces, taken_path, turn)
 

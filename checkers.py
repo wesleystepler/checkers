@@ -163,25 +163,17 @@ def get_current_square(type, obj, board_reference):
         Exception("Invalid Parameter: Please enter either 'piece' or 'square' for get_current_square type argument")
     
             
-def split_paths(paths, board_reference):
-    paths_coords = []
-    for path in paths:
-        path_coords = []
-        for i in range(0, len(path)):
-            path_coords.append(get_current_square('square', path[i], board_reference))
-        paths_coords.append(path_coords)
-
+def split_paths(paths):
     new_paths = []
-    path_overlap = 0
-    for i in range(0, len(paths_coords)):
+    for i in range(0, len(paths)):
         path1 = []
         path2 = []
-        for j in range(0, len(paths_coords[i])-1):
+        for j in range(0, len(paths[i])-1):
             path1.append(paths[i][j])
-            if abs(paths_coords[i][j][0] - paths_coords[i][j+1][0]) >= 2 and abs(paths_coords[i][j][1] - paths_coords[i][j+1][1]) >= 2:
-                split_point = paths_coords[i][j+1]
+            if abs(paths[i][j].i - paths[i][j+1].i) >= 2 and abs(paths[i][j].j - paths[i][j+1].j) >= 2:
+                split_point = paths[i][j+1]
                 for square in path1:
-                    if abs(square[0] - split_point[0]) == 1 and abs(square[1] - split_point[1]) == 1:
+                    if abs(square.i - split_point.i) == 1 and abs(square.j - split_point.j) == 1:
                         path2.append(square)
                         break
                     path2.append(square)
@@ -200,8 +192,6 @@ def split_paths(paths, board_reference):
         paths.extend(new_paths)
     return paths
     
-
-            
 
 def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces):
     """Returns all possible moves for a given piece and highlights them on the board"""
@@ -236,7 +226,7 @@ def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces)
                 possible_moves[3] = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves[3])
     
     # Check if any of the paths diverge and need to be split into two paths
-    possible_moves = split_paths(possible_moves, board_reference)
+    possible_moves = split_paths(possible_moves)
 
     # If one or more jumps are available, force the user to take one of them
     best_move = max(possible_moves, key=len)

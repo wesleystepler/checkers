@@ -158,10 +158,6 @@ def split_paths(path, board_reference):
     #while len(split_points) != 0:
 
         
-
-
-            
-
 def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces):
     """Returns all possible moves for a given piece and highlights them on the board"""
     possible_moves = [[], [], [], []]
@@ -173,26 +169,26 @@ def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces)
             if not board_reference[i+1][j+1].occupied(pieces):
                 possible_moves[0].append(board_reference[i+1][j+1])
             else:
-                possible_moves[0] = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves[0])
+                get_available_jumps(piece, board_reference, pieces, i, j, possible_moves, possible_moves[0])
 
         if (j-1) >= 0 and (i + 1) < len(board_reference):
             if not board_reference[i+1][j-1].occupied(pieces):
                 possible_moves[1].append(board_reference[i+1][j-1])
             else:
-                possible_moves[1] = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves[1])
+                get_available_jumps(piece, board_reference, pieces, i, j, possible_moves, possible_moves[1])
 
     if piece.color == 'black' or piece.type == "King":
         if (j+1) < len(board_reference[i]) and (i - 1) >= 0:
             if not board_reference[i-1][j+1].occupied(pieces):
                 possible_moves[2].append(board_reference[i-1][j+1])
             else:
-                possible_moves[2] = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves[2])
+                get_available_jumps(piece, board_reference, pieces, i, j, possible_moves, possible_moves[2])
                                 
         if (j-1) >= 0 and (i - 1) >= 0:
             if not board_reference[i-1][j-1].occupied(pieces):
                 possible_moves[3].append(board_reference[i-1][j-1])
             else:
-                possible_moves[3] = get_available_jumps(piece, board_reference, pieces, i, j, possible_moves[3])
+                get_available_jumps(piece, board_reference, pieces, i, j, possible_moves, possible_moves[3])
     
     # Check if any of the four paths diverge and need to be split into multiple paths
  
@@ -212,8 +208,19 @@ def get_possible_moves(piece, board_reference, pieces, black_pieces, red_pieces)
             move.image = POSSIBLE_MOVE
     return possible_moves
 
+def check_for_split(paths, board_reference, i, j):
+    """Helper method that returns True if the path splits,
+        and returns False otherwise."""
+    for path in paths:
+        if len(path) > 0:
+            if path[-1] == board_reference[i-1][j+1] or path[-1] == board_reference[i+1][j-1] and i > 0 and i < 7 and j > 0 and j < 7:
+                return True
+            elif path[-1] == board_reference[i-1][j-1] or path[-1] == board_reference[i+1][j+1] and i > 0 and i < 7 and j > 0 and j < 7:
+                return True
+    return False
 
-def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves):
+
+def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves, cur_possible_moves):
     queue = [(i, j)]
     while len(queue) > 0:
         i, j = queue[0][0], queue[0][1]
@@ -225,9 +232,15 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
             if (i+2) < len(board_reference) and (j+2) < len(board_reference[i]):
                 if not board_reference[i+2][j+2].occupied(pieces):
                     for p in pieces:
-                        if p.rect.colliderect(board_reference[i+1][j+1]) and p.color != cur_piece.color and board_reference[i+1][j+1] not in possible_moves and board_reference[i+2][j+2] not in possible_moves:
-                            possible_moves.append(board_reference[i+1][j+1])
-                            possible_moves.append(board_reference[i+2][j+2])
+                        if p.rect.colliderect(board_reference[i+1][j+1]) and p.color != cur_piece.color and board_reference[i+1][j+1] not in cur_possible_moves and board_reference[i+2][j+2] not in cur_possible_moves:
+                            if not check_for_split(possible_moves, board_reference, i+1, j+1):
+                                cur_possible_moves.append(board_reference[i+1][j+1])
+                                cur_possible_moves.append(board_reference[i+2][j+2])
+                            else:
+                                new_path = cur_possible_moves.copy()
+                                new_path.append(board_reference[i+1][j+1])
+                                new_path.append(board_reference[i+2][j+2])
+
                             if (i+2, j+2) not in queue:
                                 queue.append((i+2, j+2))
                                 break
@@ -235,10 +248,15 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
             if (i+2) < len(board_reference) and (j-2) >= 0:
                 if not board_reference[i+2][j-2].occupied(pieces):
                     for p in pieces:
-                        #print(i2, j2)
-                        if p.rect.colliderect(board_reference[i+1][j-1]) and p.color != cur_piece.color and board_reference[i+1][j-1] not in possible_moves and board_reference[i+2][j-2] not in possible_moves:
-                            possible_moves.append(board_reference[i+1][j-1])
-                            possible_moves.append(board_reference[i+2][j-2])
+                        if p.rect.colliderect(board_reference[i+1][j-1]) and p.color != cur_piece.color and board_reference[i+1][j-1] not in cur_possible_moves and board_reference[i+2][j-2] not in cur_possible_moves:
+                            if not check_for_split(possible_moves, board_reference, i+1, j-1):
+                                cur_possible_moves.append(board_reference[i+1][j-1])
+                                cur_possible_moves.append(board_reference[i+2][j-2])
+                            else:
+                                new_path = cur_possible_moves.copy()
+                                new_path.append(board_reference[i+1][j-1])
+                                new_path.append(board_reference[i+2][j-2])
+
                             if (i+2, j-2) not in queue:
                                 queue.append((i+2, j-2))
                                 break
@@ -247,26 +265,37 @@ def get_available_jumps(cur_piece, board_reference, pieces, i, j, possible_moves
             if (i-2) >= 0 and (j+2) < len(board_reference[i]):
                 if not board_reference[i-2][j+2].occupied(pieces):
                     for p in pieces:
-                        #print(i3, j3)
-                        if p.rect.colliderect(board_reference[i-1][j+1]) and p.color != cur_piece.color and board_reference[i-1][j+1] not in possible_moves and board_reference[i-2][j+2] not in possible_moves:
-                            possible_moves.append(board_reference[i-1][j+1])
-                            possible_moves.append(board_reference[i-2][j+2])
+                        if p.rect.colliderect(board_reference[i-1][j+1]) and p.color != cur_piece.color and board_reference[i-1][j+1] not in cur_possible_moves and board_reference[i-2][j+2] not in cur_possible_moves:
+                            if not check_for_split(possible_moves, board_reference, i-1, j+1):
+                                cur_possible_moves.append(board_reference[i-1][j+1])
+                                cur_possible_moves.append(board_reference[i-2][j+2])
+                            else:
+                                new_path = cur_possible_moves.copy()
+                                new_path.append(board_reference[i-1][j+1])
+                                new_path.append(board_reference[i-2][j+2])
+
                             if (i-2, j+2) not in queue:
                                 queue.append((i-2, j+2))
-                                break             
+                                break            
 
             if (i-2) >= 0 and (j-2) >= 0:
                 if not board_reference[i-2][j-2].occupied(pieces):
                     for p in pieces:
-                        if p.rect.colliderect(board_reference[i-1][j-1]) and p.color != cur_piece.color and board_reference[i-1][j-1] not in possible_moves and board_reference[i-2][j-2] not in possible_moves:
-                            possible_moves.append(board_reference[i-1][j-1])
-                            possible_moves.append(board_reference[i-2][j-2])
+                        if p.rect.colliderect(board_reference[i-1][j-1]) and p.color != cur_piece.color and board_reference[i-1][j-1] not in cur_possible_moves and board_reference[i-2][j-2] not in cur_possible_moves:
+                            if not check_for_split(possible_moves, board_reference, i-1, j-1):
+                                cur_possible_moves.append(board_reference[i-1][j-1])
+                                cur_possible_moves.append(board_reference[i-2][j-2])
+                            else:
+                                new_path = cur_possible_moves.copy()
+                                new_path.append(board_reference[i-1][j-1])
+                                new_path.append(board_reference[i-2][j-2])
+
                             if (i-2, j-2) not in queue:
                                 queue.append((i-2, j-2))
                                 break
 
-    split_paths(possible_moves, board_reference)
-    return possible_moves
+    #split_paths(possible_moves, board_reference)
+    #return possible_moves
 
 
 def cursor_on_piece(cursor, black_pieces, red_pieces, turn):
